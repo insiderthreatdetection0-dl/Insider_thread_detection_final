@@ -1,0 +1,49 @@
+{
+  "tier2": {
+    "tp": 178,
+    "fp": 534,
+    "fn": 23,
+    "tn": 60468,
+    "recall": 0.8855721393034826,
+    "precision": 0.25,
+    "f1": 0.3899233296823658,
+    "fpr": 0.008753811350447527,
+    "roc_auc": 0.9828852361255263,
+    "pr_auc": 0.587828001074242,
+    "escalated": 712,
+    "escalation_rate": 0.0116334166625819,
+    "n_rows": 61203
+  },
+  "tier2_config": {
+    "hc": 0.6,
+    "corr": 0.3,
+    "weights": {
+      "http": 0.5,
+      "file_device": 0.2,
+      "logon": 0.15,
+      "email": 0.15
+    }
+  },
+  "frozen_tier3_alignment": {
+    "frozen_triage_rows": 712,
+    "frozen_escalated": 712,
+    "missing_in_triage": [],
+    "extra_in_triage": [],
+    "aligned": true
+  },
+  "tier3": {
+    "llm_calls": 712,
+    "retries": 0,
+    "fallbacks": 0,
+    "severity_preserved": "712/712",
+    "action_preserved": "712/712",
+    "note": "Frozen Week-4 Tier-3 outputs (not re-run); grounding metrics reported by week4/final_llm_reasoning/outputs/grounding_results_final.csv"
+  },
+  "leakage_check": {
+    "test_rows": 61203,
+    "test_users": 200,
+    "train_users_disjoint": true,
+    "no_test_threshold_tuning": true
+  },
+  "reference_only": "Existing week5 results (recall 0.886, precision 0.25, F1 0.390, FPR 0.009, ROC-AUC 0.983, PR-AUC 0.588) are reference values, not hard-coded."
+}

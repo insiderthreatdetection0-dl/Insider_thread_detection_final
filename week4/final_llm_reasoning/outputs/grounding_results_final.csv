@@ -1,0 +1,14 @@
+metric,value
+n_cases,712
+llm_calls,712
+retries,0
+fallbacks,0
+fallback_reasons,{'': 712}
+cases_with_validated_observations,712
+validated_observation_rate,1.0
+cases_with_validated_evidence_ids,712
+validated_evidence_rate,1.0
+invalid_evidence_ids_total,0
+invalid_channels_total,0
+invalid_observations_total,0
+unsupported_intent_terms,0

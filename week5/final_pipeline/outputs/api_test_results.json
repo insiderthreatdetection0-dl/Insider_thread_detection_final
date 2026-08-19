@@ -1,0 +1,69 @@
+{
+  "tests": {
+    "health": {
+      "status": 200,
+      "models_loaded": true,
+      "ollama_available": true,
+      "tier2_config": {
+        "hc_threshold": 0.6,
+        "corr_threshold": 0.3,
+        "weights": {
+          "http": 0.5,
+          "file_device": 0.2,
+          "logon": 0.15,
+          "email": 0.15
+        }
+      }
+    },
+    "escalated": {
+      "status": 200,
+      "fused_score": 0.5,
+      "escalated": true,
+      "fired_channels": [
+        "http"
+      ],
+      "gate": "high_confidence",
+      "degraded_channels": [],
+      "degraded_mode": false,
+      "rationale": "High-confidence escalation: HTTP anomaly score exceeds 0.6."
+    },
+    "non_escalated": {
+      "status": 200,
+      "fused_score": 0.1,
+      "escalated": false,
+      "fired_channels": [],
+      "gate": "normal",
+      "degraded_channels": [],
+      "degraded_mode": false,
+      "rationale": "Normal: weighted risk 0.100 below all thresholds."
+    },
+    "missing_channel": {
+      "status": 200,
+      "degraded_channels": [
+        "http"
+      ],
+      "degraded_mode": true
+    },
+    "malformed": {
+      "status": 422
+    },
+    "schema_invalid_range": {
+      "status": 422
+    },
+    "graph_vectorized_equivalence": {
+      "n_compared": 200,
+      "mismatches": 0
+    }
+  },
+  "latency_ms": {
+    "health": 2.089,
+    "tier1_tier2": 1.849,
+    "tier1_tier2_mean": 1.849
+  },
+  "tier3_latency_sample": {
+    "status": 200,
+    "tier3_ollama_latency_ms": 1082.441,
+    "severity_category": "high",
+    "recommended_action": "soc_escalation"
+  }
+}

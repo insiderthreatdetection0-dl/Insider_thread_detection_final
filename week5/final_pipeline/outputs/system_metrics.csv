@@ -1,0 +1,14 @@
+metric,value
+tier2_tp,178.0
+tier2_fp,534.0
+tier2_fn,23.0
+tier2_tn,60468.0
+tier2_recall,0.8855721393034826
+tier2_precision,0.25
+tier2_f1,0.3899233296823658
+tier2_fpr,0.008753811350447527
+tier2_roc_auc,0.9828852361255263
+tier2_pr_auc,0.587828001074242
+tier2_escalated,712.0
+tier2_escalation_rate,0.0116334166625819
+tier2_n_rows,61203.0

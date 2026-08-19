@@ -1,0 +1,192 @@
+# Week-6 FINAL deployment — multi-container microservice architecture.
+#
+#   docker compose up --build -d  (start everything)
+#   docker compose down           (stop everything)
+#
+# Services (ONE shared image, thin wrappers over the frozen research pipeline):
+#   http-agent / file-device-agent / logon-agent / email-agent  (Tier-1 MLPs)
+#   orchestrator-api  (public API: /health /score /case /cases; frozen Tier-2)
+#   dashboard         (Streamlit; talks to orchestrator-api ONLY)
+#
+# DEPLOYMENT_MODE=microservice: the orchestrator scores Tier-1 via HTTP calls
+# to the four agent services (explicit connect/read timeouts + bounded
+# retries). For the reliable single-container local demo use
+# week6/entrypoint.sh / DEPLOYMENT_MODE=single instead (in-process Tier-1,
+# no ports 8001-8004) — see README.
+#
+# Network: internal `backend`; Tier-1 ports are NOT exposed to the host.
+# Public: 8000 -> orchestrator-api, 8501 -> dashboard.
+# Frozen artifacts: mounted READ-ONLY at their original relative paths and
+# SHA-256-verified at startup (agents verify their own model/scaler/meta;
+# orchestrator verifies data + frozen outputs + meta.json ordering contracts).
+# All long-running services use `restart: unless-stopped` (x-agent-base) and
+# healthchecks; the orchestrator starts only when all Tier-1 agents are
+# healthy and the dashboard only when the orchestrator is healthy.
+
+x-agent-base: &agent-base
+  build: .
+  image: insider-threat-w6:latest
+  networks: [backend]
+  restart: unless-stopped
+  # Deployment code bind-mounts: containers ALWAYS run the current week6/
+  # deployment layer (reliability fixes) without an image rebuild.
+
+services:
+  http-agent:
+    <<: *agent-base
+    container_name: http-agent
+    environment:
+      MODALITY: http
+    entrypoint: ["python", "-m", "uvicorn", "week6.tier1_agent:app",
+                 "--host", "0.0.0.0", "--port", "8001"]
+    expose: ["8001"]
+    volumes:
+      - ./week6:/app/week6:ro
+      - ./week5/final_pipeline:/app/week5/final_pipeline:ro
+      - ./tier1/http:/app/tier1/http:ro
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import httpx,sys; sys.exit(0 if httpx.get('http://localhost:8001/health',timeout=3).status_code==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+  file-device-agent:
+    <<: *agent-base
+    container_name: file-device-agent
+    environment:
+      MODALITY: file_device
+    entrypoint: ["python", "-m", "uvicorn", "week6.tier1_agent:app",
+                 "--host", "0.0.0.0", "--port", "8002"]
+    expose: ["8002"]
+    volumes:
+      - ./week6:/app/week6:ro
+      - ./week5/final_pipeline:/app/week5/final_pipeline:ro
+      - ./tier1/file_device:/app/tier1/file_device:ro
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import httpx,sys; sys.exit(0 if httpx.get('http://localhost:8002/health',timeout=3).status_code==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+  logon-agent:
+    <<: *agent-base
+    container_name: logon-agent
+    environment:
+      MODALITY: logon
+    entrypoint: ["python", "-m", "uvicorn", "week6.tier1_agent:app",
+                 "--host", "0.0.0.0", "--port", "8003"]
+    expose: ["8003"]
+    volumes:
+      - ./week6:/app/week6:ro
+      - ./week5/final_pipeline:/app/week5/final_pipeline:ro
+      - ./tier1/logon:/app/tier1/logon:ro
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import httpx,sys; sys.exit(0 if httpx.get('http://localhost:8003/health',timeout=3).status_code==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+  email-agent:
+    <<: *agent-base
+    container_name: email-agent
+    environment:
+      MODALITY: email
+    entrypoint: ["python", "-m", "uvicorn", "week6.tier1_agent:app",
+                 "--host", "0.0.0.0", "--port", "8004"]
+    expose: ["8004"]
+    volumes:
+      - ./week6:/app/week6:ro
+      - ./week5/final_pipeline:/app/week5/final_pipeline:ro
+      - ./tier1/email:/app/tier1/email:ro
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import httpx,sys; sys.exit(0 if httpx.get('http://localhost:8004/health',timeout=3).status_code==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+  orchestrator-api:
+    <<: *agent-base
+    container_name: orchestrator-api
+    ports:
+      - "8000:8000"
+    entrypoint: ["python", "-m", "uvicorn", "week6.orchestrator:app",
+                 "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      DEPLOYMENT_MODE: microservice
+      HTTP_AGENT_URL: http://http-agent:8001
+      FILE_DEVICE_AGENT_URL: http://file-device-agent:8002
+      LOGON_AGENT_URL: http://logon-agent:8003
+      EMAIL_AGENT_URL: http://email-agent:8004
+      # Bounded dependency protection (orchestrator -> agents): explicit
+      # connect/read timeouts + a small retry budget; never hangs forever.
+      W6_AGENT_CONNECT_TIMEOUT: "5"
+      W6_AGENT_READ_TIMEOUT: "30"
+      W6_AGENT_MAX_RETRIES: "2"
+    depends_on:
+      http-agent:
+        condition: service_healthy
+      file-device-agent:
+        condition: service_healthy
+      logon-agent:
+        condition: service_healthy
+      email-agent:
+        condition: service_healthy
+    volumes:
+      - ./week6:/app/week6:ro
+      - ./week5/final_pipeline:/app/week5/final_pipeline:ro
+      # Frozen data + outputs (read-only). Model weights/scalers are NOT
+      # mounted here — they are owned and verified by the agent containers.
+      - ./data/dayr4.2-percentile30.pkl:/app/data/dayr4.2-percentile30.pkl:ro
+      - ./data/user_split_formlp:/app/data/user_split_formlp:ro
+      - ./week4/frozen_inputs:/app/week4/frozen_inputs:ro
+      - ./week4/final_llm_reasoning/outputs:/app/week4/final_llm_reasoning/outputs:ro
+      - ./week5/final_pipeline/outputs/shap_attributions.csv:/app/week5/final_pipeline/outputs/shap_attributions.csv:ro
+      # meta.json feature-ordering contracts (verified by the orchestrator).
+      - ./tier1/http/meta.json:/app/tier1/http/meta.json:ro
+      - ./tier1/file_device/meta.json:/app/tier1/file_device/meta.json:ro
+      - ./tier1/logon/meta.json:/app/tier1/logon/meta.json:ro
+      - ./tier1/email/meta.json:/app/tier1/email/meta.json:ro
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import httpx,sys; sys.exit(0 if httpx.get('http://localhost:8000/health',timeout=3).status_code==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+
+  dashboard:
+    <<: *agent-base
+    container_name: dashboard
+    ports:
+      - "8501:8501"
+    entrypoint: ["python", "-m", "streamlit", "run", "week6/dashboard/app.py",
+                 "--server.port", "8501", "--server.address", "0.0.0.0",
+                 "--server.headless", "true", "--browser.gatherUsageStats", "false"]
+    environment:
+      W6_API_URL: http://orchestrator-api:8000
+      SHOW_GROUND_TRUTH: "false"
+    volumes:
+      - ./week6:/app/week6:ro
+      - ./week5/final_pipeline:/app/week5/final_pipeline:ro
+    depends_on:
+      orchestrator-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import httpx,sys; sys.exit(0 if httpx.get('http://localhost:8501',timeout=3).status_code==200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
+
+networks:
+  backend:
+    driver: bridge

@@ -1,0 +1,56 @@
+# Week-6 image = code + dependencies only.
+# Frozen research artifacts are NEVER baked into the image; they are mounted
+# read-only at runtime and SHA-256-verified at startup.
+
+# VCS / tooling
+.git/
+.gitignore
+.venv/
+.venv-shap/
+.pytest_cache/
+.qoder/
+.reasonix/
+.agents/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Data + frozen artifacts (mounted read-only instead)
+data/
+tier1/
+saved_models/
+mlruns/
+mlflow.db*
+*.pkl
+*.zip
+*.pt
+*.joblib
+
+# Research weeks not needed at runtime
+week1/
+week2/
+week3/
+docs/
+Dockerfile
+.dockerignore
+WEEK6_IMPLEMENTATION_PLAN.md
+ARTIFACT_CLASSIFICATION.md
+PROJECT_CHANGELOG.md
+memory.md
+
+# Frozen outputs (mounted read-only instead)
+week4/frozen_inputs/
+week4/final_llm_reasoning/outputs/
+week4/_archive/
+week4/diagnostics/
+week4/updated_outputs/
+week5/final_pipeline/outputs/
+week5/saved_models/
+week5/_historical_attempt/
+week5/*.csv
+week5/*.ipynb
+
+# Local scratch (root-anchored so package __init__.py files are kept)
+/_*.py
+/_*.txt
+week6/_smoke_case_endpoint.py

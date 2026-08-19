@@ -1,0 +1,92 @@
+{
+  "week": 4,
+  "status": "FROZEN",
+  "llm_model": "qwen2.5-1.5b-instruct",
+  "n_escalated": 712,
+  "llm_calls": 712,
+  "retries": 0,
+  "fallbacks": 0,
+  "ground_truth_leakage": false,
+  "structured_output_valid": true,
+  "manual_severity_action_policy": false,
+  "scenario_mapping_verified": true,
+  "grounding_metric_limitation_documented": true,
+  "tier2_input_frozen": true,
+  "provenance": {
+    "tier2_input": {
+      "path": "week4/frozen_inputs/improved_tier2_test_predictions.csv",
+      "rows": 61203,
+      "escalated_cases": 712,
+      "sha256": "9511923b41847e29ed85e4064827ec58253b9e526cc4e756a88d9dedbce55c26"
+    },
+    "final_llm_outputs": {
+      "path": "week4/final_llm_reasoning/outputs/llm_triage_outputs_final.csv",
+      "rows": 712,
+      "sha256": "26f5c4c6d6616d04197d21072cd7ad179031a966df32ffc79d550844490a113d",
+      "original_freeze_sha256": "22f96a371cfa2562bd293c00b44d7e295608280bf8eb9f7efd0deef2e774ee82",
+      "note": "The original frozen bytes (22f96a37...) were overwritten after the 2026-08-11 freeze and are not recoverable. Per approved decision D1-A (2026-08-11), the CURRENT on-disk artifact is the preserved/re-frozen Week-4 artifact. No LLM was re-run during closure; the LLM was never re-run for this artifact after the original generation."
+    },
+    "grounding_results": {
+      "path": "week4/final_llm_reasoning/outputs/grounding_results_final.csv",
+      "sha256": "6d3e93b06361be68f20975edd7d711297df613527b8611d5595b942e06ccbe14",
+      "note": "Not hash-tracked in the original freeze manifest; hash recorded at the D1-A re-freeze (2026-08-11)."
+    },
+    "scenario_results": {
+      "path": "week4/final_llm_reasoning/outputs/scenario_results.csv",
+      "rows": 11,
+      "users": [11, 118, 247, 555, 564, 577, 652, 767, 848, 861, 900],
+      "sha256": "bb1362088b95a73d92647dc075a193c11fe02b8fd7d0a5eac3d006312ed42912"
+    },
+    "summary": {
+      "path": "week4/final_llm_reasoning/outputs/final_week4_summary.json",
+      "sha256": "4fbe156641468be65116d2029ded3f977f4bb79281366074d9179eb55a3237d2"
+    },
+    "audit_report": "week4/final_llm_reasoning/outputs/week4_final_audit.md",
+    "canonical_notebook": "week4/final_llm_reasoning/final_llm_reasoning.ipynb",
+    "active_modules": [
+      "week4/final_llm_reasoning/evidence_builder.py",
+      "week4/final_llm_reasoning/grounding_validator.py",
+      "week4/final_llm_reasoning/llm_triage_final.py",
+      "week4/final_llm_reasoning/grounding_evaluation.py",
+      "week4/final_llm_reasoning/scenario_evaluation.py"
+    ],
+    "python_version": "3.12.13",
+    "frozen_at": "2026-08-11",
+    "refrozen_at": "2026-08-11"
+  },
+  "refreeze_note": "Re-freeze authorized by user decision D1-A (Phase 4 audit closure, 2026-08-11): the current on-disk Week-4 artifact is the artifact to preserve/re-freeze. No LLM re-run, no new LLM responses, no prompt or methodology change; only documentation/metadata updated. Distribution numbers below reflect the current on-disk artifact.",
+  "severity_distribution": {
+    "high": 666,
+    "medium": 37,
+    "low": 9,
+    "critical": 0
+  },
+  "action_distribution": {
+    "immediate_isolation": 340,
+    "soc_escalation": 326,
+    "monitor_enhanced": 37,
+    "no_action": 9,
+    "_original_freeze_record": {
+      "immediate_isolation": 341,
+      "soc_escalation": 325,
+      "monitor_enhanced": 37,
+      "no_action": 9
+    }
+  },
+  "validation_summary": {
+    "invalid_evidence_ids": 0,
+    "invalid_channels": 0,
+    "invalid_observations": 0,
+    "unsupported_intent_terms": 0,
+    "structured_json_valid": "712/712",
+    "qwen_severity_preserved": "712/712",
+    "qwen_action_preserved": "712/712"
+  },
+  "limitations": [
+    "Grounding metrics (100% validated observation/evidence-ID) are STRUCTURAL metrics of the deterministic evidence layer, not proof that 100% of Qwen's natural-language explanations are semantically grounded.",
+    "Qwen2.5-1.5B does not populate the structured observations/evidence_used fields; applied to raw LLM prose the grounding validator yields grounding_valid ~ 0 due to schema/contract mismatch.",
+    "Severity is coarse: 666/712 escalated cases labelled high; near-perfect LLM severity->action pairing; severity correlates weakly with risk (0.17) and fired-channel count (0.07).",
+    "Scenario-1 held-out test users 49/620/723 had malicious days not escalated by Tier-2 (documented as Tier-2 misses, not fabricated).",
+    "Lightweight explanation audit on existing outputs only; not a statistically rigorous hallucination benchmark (Week 5 scope)."
+  ]
+}

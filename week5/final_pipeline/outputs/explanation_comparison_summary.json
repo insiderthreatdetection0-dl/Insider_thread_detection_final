@@ -1,0 +1,19 @@
+{
+  "n_cases": 712,
+  "channel_precision": 1.0,
+  "channel_recall": 0.280313670411985,
+  "channel_f1": 0.43323970037453186,
+  "feature_precision": 0.1013576779026217,
+  "feature_recall": 0.009168997968970576,
+  "feature_f1": 0.016590353281899357,
+  "channel_jaccard_mean": 0.280313670411985,
+  "channel_jaccard_median": 0.25,
+  "feature_jaccard_mean": 0.008991629461917667,
+  "feature_jaccard_median": 0.0,
+  "total_llm_feature_claims": 734,
+  "supported_by_shap_claims": 83,
+  "evidence_grounded_only_claims": 651,
+  "unsupported_claims": 0,
+  "unsupported_claim_rate": 0.0,
+  "supported_claim_rate": 1.0
+}
